@@ -3,14 +3,27 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var flash = require('connect-flash');
+var session = require('express-session')
+var passport = require('passport');
+var mongoose = require('mongoose');
 
-var HomeFrontRouter = require('./routes/homefront.js');
-var HomeAfterRouter = require('./routes/homeafter.js');
-var LoginRouter = require('./routes/login.js');
-var SignUpRouter = require('./routes/signup.js');
 
+mongoose.connect('mongodb+srv://404foundbugs:404foundbugs@websitedatabase.746k9dj.mongodb.net/GA2?retryWrites=true&w=majority', {useNewUrlParser:true, useUnifiedTopology: true});
 
+var Router = require('./routes/index.js');
 var app = express();
+
+// Passport
+require('./config/passport'); //vượt qua passport để config trang đăng nhâp/đăng ký
+app.use(session({
+  secret: 'adsa897adsa98bs',
+  resave: false,
+  saveUninitialized: false,
+}))
+app.use(flash());
+app.use(passport.initialize())
+app.use(passport.session());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -22,10 +35,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', HomeFrontRouter);
-app.use('/home', HomeAfterRouter);
-app.use('/login', LoginRouter);
-app.use('/signup', SignUpRouter);
+app.use('/', Router);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
